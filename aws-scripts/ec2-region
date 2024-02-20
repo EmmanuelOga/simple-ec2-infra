@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+if command -v ec2-metadata &> /dev/null; then
+    # EC2 metadata is the authoritative source, and should be used if available.
+    ec2-metadata --availability-zone | sed 's/placement: \(.*\).$/\1/'
+else
+    # This should work if the AWS CLI is installed and configured.
+    aws configure get region
+fi

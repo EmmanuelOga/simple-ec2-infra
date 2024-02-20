@@ -1,0 +1,16 @@
+# Run with: systemctl start docker-compose@app
+# docker-compose.yml should be in /home/ec2-user/app
+[Unit]
+Description=%i service with docker compose
+PartOf=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/home/ec2-user/%i
+ExecStart=/usr/local/lib/docker/cli-plugins/docker-compose up -d --remove-orphans
+ExecStop=/usr/local/lib/docker/cli-plugins/docker-compose down
+
+[Install]
+WantedBy=multi-user.target

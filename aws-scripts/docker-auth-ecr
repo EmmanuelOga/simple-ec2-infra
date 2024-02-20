@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Login to ECR. ECR requires the region and account ID to be specified.
+# This script will get them from either the EC2 instance, if running there,
+# or from your AWS CLI configuration.
+
+current_path=$(dirname "$0")
+
+REGION=$($current_path/ec2-region)
+ACCOUNT=$($current_path/ec2-account-id)
+
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
