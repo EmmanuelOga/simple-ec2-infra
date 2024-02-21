@@ -138,4 +138,4 @@ CDK deploys uses CloudFormation, which is declarative. To perform infrastructure
 
 ## Tangent: AWS NAT gateway "tax" and insane egress costs
 
-Beware amazon's NAT gateway "tax" and insane egress costs. For an alternative to using NAT gateways, consider adding [fck-nat](https://fck-nat.dev/) or setting everything up in public VPCs, as done by `deploy.ts` in this repo. (although in that case Amazon will charge you monthly for all IPv4s used).
+Beware amazon's NAT gateway "tax" and [insane egress costs](https://blog.cloudflare.com/aws-egregious-egress). For an alternative to using NAT gateways, consider adding [fck-nat](https://fck-nat.dev/) or setting everything up in public VPCs, as done by `deploy.ts` in this repo. (although in that case Amazon will charge you monthly for all IPv4s used).
