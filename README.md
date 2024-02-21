@@ -113,10 +113,10 @@ Now we can export the name to a variable to keep it around:
 $ export SINFRA_ASG_NAME=myapp-infra-SimpleInfraasgASG12566E13-eBG0OeU1FTYA
 ```
 
-With that, we can call the script to get the instance ids (requires jq installed).
+With that, we can call the script to get the instance ids (requires [jq](https://github.com/jqlang/jq) installed).
 
 ```sh
-$ aws-scripts/ec2-get-asg-instances
+$ aws-scripts/asg-instances
 i-0c22ce6694c6d5152,i-0db64de0ebfa7d83c
 ```
 
