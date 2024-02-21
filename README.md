@@ -8,6 +8,8 @@ We'll use docker-compose to spawn up a group of docker containers. The `docker-c
 
 This example uses an ASG of 1 instance. AWS supports setting up alarms and scaling out on high CPU usage and other metrics. CDK allows setting this up and can be easily added to the deploy script if required. Also, while it is possible to deploy to multiple regions with the same script, here we just do it to a single region, in multiple availability zones.
 
+The rollout uses the cool [docker-rollout](https://github.com/Wowu/docker-rollout) plugin by @Wowu, which is a short script that spawns a new replica of a docker compose service, waits for it to be healthy, and then kills the old replica containers.
+
 *NOTE*: having an ASG of 1 instance is still useful as AWS can restart the instance if it dies, for whatever reason, even if you manually stop it!
 
 ## Requirements:
