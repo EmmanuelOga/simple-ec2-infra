@@ -138,6 +138,8 @@ The SINFRA_ECR_REPO is also useful if you want to push your own image to a priva
 
 CDK deploys uses CloudFormation, which is declarative. To perform infrastructure changes, we can simply modify the `update-infra/deploy.ts` script and re-deploy (`npm run cdk deploy`). Most of the times these changes can be performed in place, although in my experience sometimes is necessary to recreate the infra when we change things like VPC configurations in a way that CloudFormation can't fix. But things like changing number or type of instances just work.
 
+Also you can change some settings from the EC2 console directly. For instance, in the EC2 tab, go to the autoscale-group and you will be able to change the desired number of instances to grow or shrink the group as needed.
+
 ## Tangent: AWS NAT gateway "tax" and insane egress costs
 
 Beware amazon's NAT gateway "tax" and [insane egress costs](https://blog.cloudflare.com/aws-egregious-egress). For an alternative to using NAT gateways, consider adding [fck-nat](https://fck-nat.dev/) or setting everything up in public VPCs, as done by `deploy.ts` in this repo. (although in that case Amazon will charge you monthly for all IPv4s used).
