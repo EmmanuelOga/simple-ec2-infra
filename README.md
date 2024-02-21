@@ -32,6 +32,8 @@ SINFRA_ECR_REPO=myapp-deploy-repo
 Run:
 ```sh
 $ source .env
+# or:
+$ export $(xargs <.env)
 ```
 
 2. Create an s3 bucket.
@@ -87,6 +89,46 @@ $ ssh i-123456789abcdefgh # Profit :-)
 ## Rolling deploys
 
 To perform rolling deploys, we need to update the docker-compose.yml file, upload to S3, then ask each server in the autoscaling group to rollout the new container. The ECR repo comes handy here: we can push the built container there, and point to it from the docker-compose.yml file. Every EC2 instance should be authorized to pull from it.
+
+When the deploy finished, it should include the name of the autoscaling group (or you can get it from the EC2 web console):
+
+```sh
+Outputs:
+myapp-infra.SimpleInfraautoscalinggroupnameDA263BD6 = myapp-infra-SimpleInfraasgASG12566E13-eBG0OeU1FTYA
+myapp-infra.SimpleInfraloadbalancerurlA16143A4 = myapp--Simpl-vWIhiQbUsj7z-464640336.us-west-2.elb.amazonaws.com
+myapp-infra.SimpleInfrarepositoryurl41B3F834 = 639664408142.dkr.ecr.us-west-2.amazonaws.com/myapp-deploy-repo
+Stack ARN:
+arn:aws:cloudformation:us-west-2:639664408142:stack/myapp-infra/0963f8f0-d04d-11ee-b18c-02b2bb8516b1
+
+✨  Total time: 4.02s
+```
+
+Now we can export the name to a variable to keep it around:
+
+```sh
+$ export SINFRA_ASG_NAME=myapp-infra-SimpleInfraasgASG12566E13-eBG0OeU1FTYA
+``
+
+With that, we can call the script to get the instance ids (requires jq installed).
+
+```
+$ aws-scripts/ec2-get-asg-instances
+i-0c22ce6694c6d5152,i-0db64de0ebfa7d83c
+```
+
+Change the docker-compose.yml to point to the new version of your containers.
+The rollout script updates only one service defined on the compose file at once.
+In this example, I will rollout the 'whoami' service with a script:
+
+```sh
+$ vim assets/example.docker-compose.yml # Update the docker compose service.
+$ aws s3 cp assets/example/docker-compose.yml s3://$SINFRA_S3_BUCKET/docker-compose.yml # We need to update the changes to S3.
+$ aws-scripts/asg-rollout # Rollout the changes.
+```
+
+NOTE: we use S3 for the config file since it is highly available. The EC2 instances of the ASG are configured to automatically download the compose file from there if they need to restart or create a new instance.
+
+The SINFRA_ECR_REPO is also useful if you want to push your own image to a private repo managed by AWS. Since we gave them the right IAM roles, both the server and your user should be able to push and pull from the repo.
 
 ## Adjusting the infrastructure.
 

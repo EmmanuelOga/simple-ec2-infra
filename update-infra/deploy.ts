@@ -37,9 +37,7 @@ export class SimpleInfra extends Construct {
     });
 
     // Don't go through NAT gateway for S3 traffic.
-    vpc.addGatewayEndpoint('S3Endpoint', {
-      service: ec2.GatewayVpcEndpointAwsService.S3
-    });
+    vpc.addGatewayEndpoint('S3-endpoint', { service: ec2.GatewayVpcEndpointAwsService.S3 });
 
     const role = new iam.Role(this, 'role', {
       assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
@@ -166,6 +164,72 @@ export class SimpleInfra extends Construct {
       }
     });
 
+    const useNACLs = false;
+    if (useNACLs) {
+      // Setup Network ACLs to restrict traffic to the load balancer.
+      const publicSubnets = vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC });
+      // Default NACL denies Inbound and Outbound traffic.
+      const nacl = new ec2.NetworkAcl(this, 'nacl', {
+        vpc,
+        networkAclName: 'public-subnet-nacl',
+        subnetSelection: publicSubnets,
+      });
+
+      let ruleNumber = 0;
+      // Add a rule with an incrementing rule number.
+      function addNaclRule(label: string, options: Omit<ec2.CommonNetworkAclEntryOptions, "ruleNumber">) {
+        ruleNumber += 100;
+        nacl.addEntry(`${label}-${ruleNumber}`, { ...options, ruleNumber })
+      }
+
+      // https://digitalcorax.com/blog/how-to-setup-a-vpc-with-aws-cloud-development-kit
+      publicSubnets.subnets.forEach((subnet, index) => {
+        // Allow ingress between nodes of the subnet.
+        addNaclRule(`whole-subnet-${index}-ingress`, {
+          direction: ec2.TrafficDirection.INGRESS,
+          cidr: ec2.AclCidr.ipv4(subnet.ipv4CidrBlock),
+          traffic: ec2.AclTraffic.allTraffic(),
+        })
+
+        // Allow egress between nodes of the subnet.
+        addNaclRule(`whole-subnet-${index}-egress`, {
+          direction: ec2.TrafficDirection.EGRESS,
+          cidr: ec2.AclCidr.ipv4(subnet.ipv4CidrBlock),
+          traffic: ec2.AclTraffic.allTraffic(),
+        })
+
+        // Allow traffic from/to HTTP and HTTPS (and egress to ephemeral ports).
+        // It would be nice to restrict this to just the load balancer,
+        // but the load balancer IPs are not known in advance.
+        // Maybe it could be done with https://ip-ranges.amazonaws.com/ip-ranges.json
+        addNaclRule(`subnet-${index}-ingress-http`, {
+          direction: ec2.TrafficDirection.INGRESS,
+          cidr: ec2.AclCidr.anyIpv4(),
+          traffic: ec2.AclTraffic.tcpPort(80),
+        });
+        addNaclRule(`subnet-${index}-egress-http`, {
+          direction: ec2.TrafficDirection.EGRESS,
+          cidr: ec2.AclCidr.anyIpv4(),
+          traffic: ec2.AclTraffic.tcpPort(80),
+        });
+        addNaclRule(`subnet-${index}-ingress-https`, {
+          direction: ec2.TrafficDirection.INGRESS,
+          cidr: ec2.AclCidr.anyIpv4(),
+          traffic: ec2.AclTraffic.tcpPort(443),
+        });
+        addNaclRule(`subnet-${index}-egress-https`, {
+          direction: ec2.TrafficDirection.EGRESS,
+          cidr: ec2.AclCidr.anyIpv4(),
+          traffic: ec2.AclTraffic.tcpPort(443),
+        });
+        addNaclRule(`subnet-${index}-egress-ephemeral`, {
+          direction: ec2.TrafficDirection.EGRESS,
+          cidr: ec2.AclCidr.anyIpv4(),
+          traffic: ec2.AclTraffic.allTraffic(),
+        });
+      });
+    }
+
     // Attach a WAFv2 WebACL to the load balancer.
     // https://aws.amazon.com/blogs/devops/easily-protect-your-aws-cdk-defined-infrastructure-with-aws-wafv2/
     const cfnWebACL = new wafv2.CfnWebACL(this,
@@ -211,6 +275,10 @@ export class SimpleInfra extends Construct {
 
     new cdk.CfnOutput(this, 'load-balancer-url', {
       value: loadBalancer.loadBalancerDnsName,
+    });
+
+    new cdk.CfnOutput(this, 'autoscaling-group-name', {
+      value: autoScalingGroup.autoScalingGroupName,
     });
   }
 }

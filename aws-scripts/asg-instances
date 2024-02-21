@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+if [[ -z $SINFRA_ASG_NAME ]]; then
+  echo "Error: SINFRA_ASG_NAME variable is not defined. It should be defined to the name of the AustoScalingGroup to update."
+  exit 1
+fi
+
+aws autoscaling describe-auto-scaling-instances | jq -r "[.AutoScalingInstances | .[] | select(.AutoScalingGroupName == \"$SINFRA_ASG_NAME\") | .InstanceId] | join(\",\")"

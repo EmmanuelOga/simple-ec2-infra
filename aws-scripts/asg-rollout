@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+if [[ -z $SINFRA_S3_BUCKET ]]; then
+  echo "Error: SINFRA_S3_BUCKET variable is not defined. It should be defined to a S3 bucket name containining a docker-compose.yml file."
+  exit 1
+fi
+
+current_path=$(dirname "$0")
+instances=$($current_path/asg-instances)
+
+for instance in ${instances//,/ }; do
+  ssh $instance <<EOF
+  aws s3 cp s3://$SINFRA_S3_BUCKET/docker-compose.yml /home/ec2-user/app
+  docker rollout -f /home/ec2-user/app/docker-compose.yml whoami
+EOF
+done

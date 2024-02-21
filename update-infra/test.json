@@ -1,0 +1,32 @@
+{
+    "AutoScalingInstances": [
+        {
+            "InstanceId": "i-0c22ce6694c6d5152",
+            "InstanceType": "t4g.nano",
+            "AutoScalingGroupName": "myapp-infra-SimpleInfraasgASG12566E13-eBG0OeU1FTYA",
+            "AvailabilityZone": "us-west-2b",
+            "LifecycleState": "InService",
+            "HealthStatus": "HEALTHY",
+            "LaunchTemplate": {
+                "LaunchTemplateId": "lt-0773837ae76639db0",
+                "LaunchTemplateName": "SimpleInfraasgLaunchTemplat_DAlGGtrhjGSZ",
+                "Version": "1"
+            },
+            "ProtectedFromScaleIn": false
+        },
+        {
+            "InstanceId": "i-0db64de0ebfa7d83c",
+            "InstanceType": "t4g.nano",
+            "AutoScalingGroupName": "myapp-infra-SimpleInfraasgASG12566E13-eBG0OeU1FTYA",
+            "AvailabilityZone": "us-west-2a",
+            "LifecycleState": "InService",
+            "HealthStatus": "HEALTHY",
+            "LaunchTemplate": {
+                "LaunchTemplateId": "lt-0773837ae76639db0",
+                "LaunchTemplateName": "SimpleInfraasgLaunchTemplat_DAlGGtrhjGSZ",
+                "Version": "1"
+            },
+            "ProtectedFromScaleIn": false
+        }
+    ]
+}
