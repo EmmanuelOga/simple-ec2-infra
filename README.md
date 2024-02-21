@@ -58,7 +58,7 @@ $ aws ecr create-repository --repository-name $SINFRA_ECR_REPO --region $(aws-sc
 $ cd update-infra && npm run cdk deploy 
 ```
 
-4. Open load-balancer url from the CDK output, you should see the application running.
+6. Open load-balancer url from the CDK output, you should see the application running.
 
 NOTE: the repo just sets up HTTP, so make sure to load http and not https for the url on your browser.
 
