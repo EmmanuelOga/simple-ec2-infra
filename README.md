@@ -58,6 +58,8 @@ $ cd update-infra && npm run cdk deploy
 
 4. Open load-balancer url from the CDK output, you should see the application running.
 
+NOTE: the repo just sets up HTTP, so make sure to load http and not https for the url on your browser.
+
 ## How to SSH into the EC2 instance/s
 
 We can connect to the machine/s without opening port 22, through AWS Systems Manager agent. See https://cloudonaut.io/connect-to-your-ec2-instance-using-ssh-the-modern-way/ for more information.
@@ -133,3 +135,7 @@ The SINFRA_ECR_REPO is also useful if you want to push your own image to a priva
 ## Adjusting the infrastructure.
 
 CDK deploys uses CloudFormation, which is declarative. To perform infrastructure changes, we can simply modify the `update-infra/deploy.ts` script and re-deploy (`npm run cdk deploy`). Most of the times these changes can be performed in place, although in my experience sometimes is necessary to recreate the infra when we change things like VPC configurations in a way that CloudFormation can't fix. But things like changing number or type of instances just work.
+
+## Tangent: AWS NAT gateway "tax" and insane egress costs
+
+Beware amazon's NAT gateway "tax" and insane egress costs. For an alternative to using NAT gateways, consider adding [fck-nat](https://fck-nat.dev/) or setting everything up in public VPCs, as done by `deploy.ts` in this repo. (although in that case Amazon will charge you monthly for all IPv4s used).
