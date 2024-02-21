@@ -15,7 +15,7 @@ The rollout uses the cool [docker-rollout](https://github.com/Wowu/docker-rollou
 ## Requirements:
 
 * A running [AWS CLI app](https://docs.aws.amazon.com/cli/).
-* A bootstrapped [CDK installation](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_bootstrap) (see also (CDK Workshop)[https://cdkworkshop.com/]).
+* A bootstrapped [CDK installation](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_bootstrap) (see also [CDK Workshop](https://cdkworkshop.com/)).
 * Docker.
 
 ## Bootstrap
